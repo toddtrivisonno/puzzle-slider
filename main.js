@@ -1,112 +1,92 @@
+// Tile making factory
+var tiles = [];
 
+// Tile Constructor
+class Tile {
+   constructor(startEndPos, currentPos, x, y, type) {
+      this.startEndPos = startEndPos;
+      this.currentPos = currentPos;
+      this.x = x;
+      this.y = y;
+      this.type = type;
 
-let puzzleTiles = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
-let count = 0;
-
-// Place dynamically created tiles into container
-function placeTiles() {
-   for (let i = 0; i < tiles.length; i++) {
-      let getTag = document.getElementById(i);
-      let getCont = tiles[i].content;
-      // console.log({ getTag, getCont });
-      getTag.appendChild(getCont);
+      this.content = document.getElementById(startEndPos);
+      this.content.innerHTML = currentPos;
    }
 }
 
-function createHTML() {
-   let tag = document.createElement('div');
-   tag.className = "div";
-   return tag;
-}
+function tileClick(e) {
+   /* find the zero tile in JS and on Board */
+   let positionOfBlankTile = 0;
+   var positionOfCurrentTile = e.target.id;
 
-function tileClick() {
-   /* Finding the Tile with Current Position = 0 */
-   let zeroTile = 0;
+   // Gets the index of the array of the blank tile by current position
    for (let i = 0; i < tiles.length; i++) {
       if (tiles[i].currentPos == 0) {
-         zeroTile = i;
+         positionOfBlankTile = i;
          break;
       }
    }
+   /* Check if its a valid move */
+   if (positionOfCurrentTile == positionOfBlankTile + 1 ||
+      positionOfCurrentTile == positionOfBlankTile - 1 ||
+      positionOfCurrentTile == positionOfBlankTile + 4 ||
+      positionOfCurrentTile == positionOfBlankTile - 4) {
 
-   /* Check if click is a valid move */
+      /* find the clicked tile in JS and on Board */
+      let clickedTile = tiles[e.target.id];
+      let zeroTile = tiles[positionOfBlankTile];
 
-   console.log({ "34 tiles_i": tiles[this.id].currentPos, "34 zero_i":tiles[zeroTile].currentPos });
-   if (tiles[this.id].currentPos == tiles[zeroTile].currentPos + 1 ||
-      tiles[this.id].currentPos == tiles[zeroTile].currentPos - 1 ||
-      tiles[this.id].currentPos == tiles[zeroTile].currentPos + 4 ||
-      tiles[this.id].currentPos == tiles[zeroTile].currentPos - 4) {
+      /* if /\    Swap 2 tiles */
+      let storeClickedTile = clickedTile.currentPos;
+      clickedTile.currentPos = zeroTile.currentPos;
+      zeroTile.currentPos = storeClickedTile;
 
-      /* Replacing the location of two tiles */
-      let temp = tiles[this.id].currentPos;                     // Store tile clicked into temporary variable
-      tiles[this.id].currentPos = tiles[zeroTile].currentPos;   // Set tile clicked's current position to Tile Zero's current position
-      tiles[zeroTile].currentPos = temp;                        // Set Zero's current position to stored tiles current position
-
-      console.log({ "45 tiles_i": tiles[this.id].currentPos, "45 zero_i":tiles[zeroTile].currentPos });
-
-
-      // let type = tiles[this.id].type;
-      // tiles[this.id].type = tiles[0].type;
-      // tiles[0].type = type;
+      /* if /\    make changes to html / render the new 2 tiles */
+      document.getElementById(positionOfBlankTile).innerHTML = zeroTile.currentPos;
+      document.getElementById(e.target.id).innerHTML = clickedTile.currentPos;
+      console.log(clickedTile);
+      console.log(zeroTile);
+   }
+   /* else /\  dont make any changes */
+}
 
 
-      /* Updating Inner HTML */
-      document.getElementById(zeroTile).innerHTML = temp;              // Display 
-      document.getElementById(this.id).innerHTML = tiles[this.id].currentPos;
+// Create and push blank tile into array
+function createGrid() {
+   let xCnt = 1;
+   let yCnt = 0;
+   var blankTile = new Tile(
+      0,
+      0,
+      0,
+      0,
+      1
+   )
+   tiles.push(blankTile);
 
+   for (let i = 1; i <= 15; i++) {
+
+      let movingTile = new Tile(
+         i,
+         i,
+         xCnt,
+         yCnt,
+         0
+      )
+
+      if (xCnt < 3) {
+         xCnt++;
+      } else if (xCnt == 3) {
+         yCnt++;
+         xCnt = 0;
+      }
+
+      tiles.push(movingTile);
    }
    console.log(tiles);
 }
 
-// Tile Constructor
-function Tile(startEndPos, currentPos, x, y, type) {
-   this.startEndPos = startEndPos;
-   this.currentPos = currentPos;
-   this.x = x;
-   this.y = y;
-   this.type = type;
-   this.content = createHTML();
-   this.content.innerHTML = startEndPos;
-}
-
-loadPuzzle();
-
-// Tile making factory
-var tiles = [];
-let xCnt = 1;
-let yCnt = 0;
-
-// Create and push blank tile into array
-var blankTile = new Tile(
-   0,
-   0,
-   0,
-   0,
-   1
-)
-tiles.push(blankTile);
-
-for (let i = 1; i <= 15; i++) {
-
-   let movingTile = new Tile(
-      i,
-      i,
-      xCnt,
-      yCnt,
-      0
-   )
-
-   if (xCnt < 3) {
-      xCnt++;
-   } else if (xCnt == 3) {
-      yCnt++;
-      xCnt = 0;
-   }
-
-   tiles.push(movingTile);
-}
-console.log(tiles);
-placeTiles();
 
 
 // Create Puzzle UI
@@ -123,7 +103,7 @@ function loadPuzzle() {
    title.innerHTML = "Puzzling";
    title.className = "h2 text-center";
    puzzle.appendChild(title);
-
+   let count = 0;
    for (let i = 0; i < 4; i++) {
       var rowDiv = document.createElement('div');
       rowDiv.className = "row justify-content-center";
@@ -132,15 +112,15 @@ function loadPuzzle() {
          var colDiv = document.createElement('div');
          colDiv.className = "col-3 border text-center";
          colDiv.setAttribute("style", "height: 10vh");
-         colDiv.id = puzzleTiles[count];
-         // let labels = document.createTextNode(puzzleTiles[count]);
-         count++;
          colDiv.addEventListener('click', tileClick);
-         // colDiv.appendChild(labels);
+         colDiv.id = count;
          rowDiv.appendChild(colDiv);
+         count++;
       }
       puzzle.appendChild(rowDiv);
    }
    newDiv.appendChild(puzzle);
    app.appendChild(newDiv);
+   createGrid()
 }
+loadPuzzle();
