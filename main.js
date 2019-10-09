@@ -15,6 +15,14 @@ class Tile {
    }
 }
 
+function shuffle() {
+   console.log('Shuffle button clicked');
+   for (let i = 0; i < 500; i++) {
+      document.getElementById(Math.floor(Math.random() * 16)).click();        // Randomly clicks thru ids
+      $('#alert').hide();
+   }
+}
+
 function tileClick(e) {
    /* find the zero tile in JS and on Board */
    let positionOfBlankTile = 0;
@@ -49,6 +57,19 @@ function tileClick(e) {
       console.log(zeroTile);
    }
    /* else /\  dont make any changes */
+
+   /* Check Win */
+   let checkPositions = 0
+   for (let i = 0; i < tiles.length; i++) {
+      if (tiles[i].currentPos == tiles[i].startEndPos) {
+         checkPositions++;
+         if (checkPositions == 16) {
+            $('#alert').show();
+            document.getElementById('alert').innerHTML = "Huzzah!";
+            // alert('Winner chicken dinner');
+         }
+      }
+   }
 }
 
 
@@ -87,10 +108,9 @@ function createGrid() {
    console.log(tiles);
 }
 
-
-
 // Create Puzzle UI
 function loadPuzzle() {
+
    var newDiv = document.createElement('div');
    newDiv.className = "container mx-auto";
    newDiv.setAttribute("style", "height: 300px");
@@ -103,6 +123,13 @@ function loadPuzzle() {
    title.innerHTML = "Puzzling";
    title.className = "h2 text-center";
    puzzle.appendChild(title);
+
+   var alertEnd = document.createElement('div');
+   alertEnd.className = "alert alert-success alert-dismissible m-2";
+   alertEnd.id = "alert";
+   app.appendChild(alertEnd);
+   $('#alert').hide();
+
    let count = 0;
    for (let i = 0; i < 4; i++) {
       var rowDiv = document.createElement('div');
@@ -121,6 +148,13 @@ function loadPuzzle() {
    }
    newDiv.appendChild(puzzle);
    app.appendChild(newDiv);
+
    createGrid()
+
+   var shuffleBtn = document.createElement('div');
+   shuffleBtn.className = "container btn btn-info btn-lg mx-auto m-3";
+   shuffleBtn.innerHTML = "Shuffle";
+   shuffleBtn.addEventListener('click', shuffle);
+   puzzle.appendChild(shuffleBtn);
 }
 loadPuzzle();
