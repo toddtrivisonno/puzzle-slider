@@ -1,4 +1,5 @@
 var img = "img/seth_addy_swing_300.jpeg";
+let counter = 0;
 
 // Tile making factory
 var tiles = [];
@@ -12,55 +13,60 @@ class Tile {
       this.y = y;
       this.type = type;
 
-
+      /* Render the image onto the tiles */
       this.render = function () {
+
          // update the ui
          this.content = document.getElementById(this.startEndPos);
-         //this.content.innerHTML = this.currentPos;
-
-
-         /* Add Image to Game Board */
-
-         // let imgPlace = document.createElement('div');
-         // imgPlace.className = "container mx-auto";
-         // imgPlace.id = "imgPlace";
-         // imgPlace.setAttribute("style", "height: 300px");
-         // colDiv.appendChild(imgPlace);
-
-
 
          let imgDiv = document.createElement('img');
          imgDiv.setAttribute("src", img);
          imgDiv.setAttribute("id", this.startEndPos);
-         if(this.currentPos == 0){
+
+         if (this.currentPos == 0) {
             imgDiv.setAttribute("style", "opacity:0;");
          } else {
-            // TODO: do math for the setting of the negative margins
-            //
             let marginLeft = (this.currentPos % 4) * -70 + "px";
             let marginTop = (parseInt(this.currentPos / 4)) * -70 + "px";
             imgDiv.setAttribute("style", "margin-left:" + marginLeft + "; margin-top:" + marginTop + ";");
          }
-         // console.log("before",this.content)
          this.content.innerHTML = "";
-         // console.log("after delete",this.content)
          this.content.appendChild(imgDiv);
-         // console.log("after new append",this.content)
-
       }
    }
 }
 
+/* Upload users image */
+function upload(e) {
+   tiles = [];
+   let newImg = URL.createObjectURL(e.target.files[0]);
+   img = newImg;
+   loadPuzzle();
+}
 
+/* Shuffle the tiles */
+function shuffleEasy() {
+   for (let i = 0; i < 50; i++) {
+      document.getElementById(Math.floor(Math.random() * 16)).click();        // Randomly clicks thru ids
+      $('#alert').hide();
+   }
+   counter = 0;
+   document.getElementById('clickCounter').innerHTML = "Click counter = " + counter;
+
+}
 
 function shuffle() {
    for (let i = 0; i < 500; i++) {
       document.getElementById(Math.floor(Math.random() * 16)).click();        // Randomly clicks thru ids
       $('#alert').hide();
    }
+   counter = 0;
+   document.getElementById('clickCounter').innerHTML = "Click counter = " + counter;
+
 }
 
 function tileClick(e) {
+
    /* find the zero tile in JS and on Board */
    let positionOfBlankTile = 0;
    var positionOfCurrentTile = parseInt(e.target.id);
@@ -72,11 +78,15 @@ function tileClick(e) {
          break;
       }
    }
+
    /* Check if its a valid move */
-   if (positionOfCurrentTile == positionOfBlankTile + 1 ||
-      positionOfCurrentTile == positionOfBlankTile - 1 ||
+   if (positionOfCurrentTile == positionOfBlankTile + 1 && positionOfCurrentTile % 4 != 0 ||          // Prevents moving to tile on next row
+      positionOfCurrentTile == positionOfBlankTile - 1 && (positionOfCurrentTile + 1) % 4 != 0 ||
       positionOfCurrentTile == positionOfBlankTile + 4 ||
       positionOfCurrentTile == positionOfBlankTile - 4) {
+
+      counter++;
+      document.getElementById('clickCounter').innerHTML = "Click counter = " + counter;
 
       /* find the clicked tile in JS and on Board */
       let clickedTile = tiles[e.target.id];
@@ -90,30 +100,22 @@ function tileClick(e) {
       /* If /\ Render Images on the Tile */
       clickedTile.render();
       zeroTile.render();
+      /* else /\  dont make any changes */
 
-      /* if /\    make changes to html / render the new 2 tiles */
-      // document.getElementById(positionOfBlankTile).innerHTML = zeroTile.currentPos;
-      // document.getElementById(e.target.id).innerHTML = clickedTile.currentPos;
-
-   }
-   /* else /\  dont make any changes */
-
-   /* Check Win */
-   let checkPositions = 0
-   for (let i = 0; i < tiles.length; i++) {
-      if (tiles[i].currentPos == tiles[i].startEndPos) {
-         checkPositions++;
-         if (checkPositions == 16) {
-            $('#alert').show();
-            document.getElementById('alert').innerHTML = "Huzzah!";
-            // alert('Winner chicken dinner');
-   console.log(tiles);
-            
+      /* Check Win */
+      let checkPositions = 0
+      for (let i = 0; i < tiles.length; i++) {
+         if (tiles[i].currentPos == tiles[i].startEndPos) {
+            checkPositions++;
+            if (checkPositions == 16) {
+               $('#alert').show();
+               document.getElementById('alert').innerHTML = "Sweet victory!";
+               console.log(tiles);
+            }
          }
       }
    }
 }
-
 
 // Create and push blank tile into array
 function createGrid() {
@@ -138,7 +140,6 @@ function createGrid() {
          yCnt,
          0
       )
-
       if (xCnt < 3) {
          xCnt++;
       } else if (xCnt == 3) {
@@ -154,6 +155,8 @@ function createGrid() {
 // Create Puzzle UI
 function loadPuzzle() {
 
+   document.getElementById('app').innerHTML = "";
+
    var newDiv = document.createElement('div');
    newDiv.className = "container mx-auto";
    // newDiv.setAttribute("style", "height: 300px");
@@ -164,11 +167,21 @@ function loadPuzzle() {
 
    var title = document.createElement('p');
    title.innerHTML = "Puzzling";
-   title.className = "h2 text-center";
+   title.className = "h2 text-center mt-3";
    puzzle.appendChild(title);
 
+   var clickCounter = document.createElement('p');
+   clickCounter.id = "clickCounter";
+   clickCounter.innerHTML = "Click counter = " + counter;
+   clickCounter.className = "h4 text-center mt-2";
+
+   var uploadImg = document.createElement('input');
+   uploadImg.className = "form-control-file btn btn-light mt-2";
+   uploadImg.setAttribute('type', 'file');
+   uploadImg.addEventListener('change', upload);
+
    var alertEnd = document.createElement('div');
-   alertEnd.className = "alert alert-success alert-dismissible m-2";
+   alertEnd.className = "alert alert-success alert-dismissible mt-4 mb-0";
    alertEnd.id = "alert";
    app.appendChild(alertEnd);
    $('#alert').hide();
@@ -188,16 +201,26 @@ function loadPuzzle() {
          count++;
       }
       puzzle.appendChild(rowDiv);
+      puzzle.appendChild(clickCounter);
    }
    newDiv.appendChild(puzzle);
    app.appendChild(newDiv);
 
    createGrid()
 
+   var shuffleBtnEasy = document.createElement('div');
+   shuffleBtnEasy.className = "container btn btn-success btn-lg mx-auto m-2";
+   shuffleBtnEasy.innerHTML = "Shuffle Easy";
+   shuffleBtnEasy.addEventListener('click', shuffleEasy);
+   puzzle.appendChild(shuffleBtnEasy);
+
    var shuffleBtn = document.createElement('div');
-   shuffleBtn.className = "container btn btn-info btn-lg mx-auto m-3";
-   shuffleBtn.innerHTML = "Shuffle";
+   shuffleBtn.className = "container btn btn-danger btn-lg mx-auto m-2";
+   shuffleBtn.innerHTML = "Shuffle Master";
    shuffleBtn.addEventListener('click', shuffle);
    puzzle.appendChild(shuffleBtn);
+
+   puzzle.appendChild(uploadImg);
+
 }
 loadPuzzle();
