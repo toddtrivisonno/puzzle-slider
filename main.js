@@ -1,3 +1,5 @@
+var img = "img/seth_addy_swing_300.jpeg";
+
 // Tile making factory
 var tiles = [];
 
@@ -10,13 +12,48 @@ class Tile {
       this.y = y;
       this.type = type;
 
-      this.content = document.getElementById(startEndPos);
-      this.content.innerHTML = currentPos;
+
+      this.render = function () {
+         // update the ui
+         this.content = document.getElementById(this.startEndPos);
+         //this.content.innerHTML = this.currentPos;
+
+
+         /* Add Image to Game Board */
+
+         // let imgPlace = document.createElement('div');
+         // imgPlace.className = "container mx-auto";
+         // imgPlace.id = "imgPlace";
+         // imgPlace.setAttribute("style", "height: 300px");
+         // colDiv.appendChild(imgPlace);
+
+
+
+         let imgDiv = document.createElement('img');
+         imgDiv.setAttribute("src", img);
+         imgDiv.setAttribute("id", this.startEndPos);
+         if(this.currentPos == 0){
+            imgDiv.setAttribute("style", "opacity:0;");
+         } else {
+            // TODO: do math for the setting of the negative margins
+            //
+            let marginLeft = (this.currentPos % 4) * -70 + "px";
+            let marginTop = (parseInt(this.currentPos / 4)) * -70 + "px";
+            imgDiv.setAttribute("style", "margin-left:" + marginLeft + "; margin-top:" + marginTop + ";");
+         }
+         // console.log("before",this.content)
+         this.content.innerHTML = "";
+         // console.log("after delete",this.content)
+         this.content.appendChild(imgDiv);
+         // console.log("after new append",this.content)
+
+      }
    }
 }
 
+
+
 function shuffle() {
-   console.log('Shuffle button clicked');
    for (let i = 0; i < 500; i++) {
       document.getElementById(Math.floor(Math.random() * 16)).click();        // Randomly clicks thru ids
       $('#alert').hide();
@@ -26,7 +63,7 @@ function shuffle() {
 function tileClick(e) {
    /* find the zero tile in JS and on Board */
    let positionOfBlankTile = 0;
-   var positionOfCurrentTile = e.target.id;
+   var positionOfCurrentTile = parseInt(e.target.id);
 
    // Gets the index of the array of the blank tile by current position
    for (let i = 0; i < tiles.length; i++) {
@@ -50,11 +87,14 @@ function tileClick(e) {
       clickedTile.currentPos = zeroTile.currentPos;
       zeroTile.currentPos = storeClickedTile;
 
+      /* If /\ Render Images on the Tile */
+      clickedTile.render();
+      zeroTile.render();
+
       /* if /\    make changes to html / render the new 2 tiles */
-      document.getElementById(positionOfBlankTile).innerHTML = zeroTile.currentPos;
-      document.getElementById(e.target.id).innerHTML = clickedTile.currentPos;
-      console.log(clickedTile);
-      console.log(zeroTile);
+      // document.getElementById(positionOfBlankTile).innerHTML = zeroTile.currentPos;
+      // document.getElementById(e.target.id).innerHTML = clickedTile.currentPos;
+
    }
    /* else /\  dont make any changes */
 
@@ -67,6 +107,8 @@ function tileClick(e) {
             $('#alert').show();
             document.getElementById('alert').innerHTML = "Huzzah!";
             // alert('Winner chicken dinner');
+   console.log(tiles);
+            
          }
       }
    }
@@ -83,7 +125,8 @@ function createGrid() {
       0,
       0,
       1
-   )
+   );
+   blankTile.render();
    tiles.push(blankTile);
 
    for (let i = 1; i <= 15; i++) {
@@ -102,7 +145,7 @@ function createGrid() {
          yCnt++;
          xCnt = 0;
       }
-
+      movingTile.render();
       tiles.push(movingTile);
    }
    console.log(tiles);
@@ -113,11 +156,11 @@ function loadPuzzle() {
 
    var newDiv = document.createElement('div');
    newDiv.className = "container mx-auto";
-   newDiv.setAttribute("style", "height: 300px");
+   // newDiv.setAttribute("style", "height: 300px");
 
    var puzzle = document.createElement('div');
-   puzzle.className = "mx-auto h-100";
-   puzzle.setAttribute("style", "width: 300px");
+   puzzle.className = "mx-auto";
+   puzzle.setAttribute("style", "width: 250px");
 
    var title = document.createElement('p');
    title.innerHTML = "Puzzling";
@@ -137,10 +180,10 @@ function loadPuzzle() {
 
       for (let j = 0; j < 4; j++) {
          var colDiv = document.createElement('div');
-         colDiv.className = "col-3 border text-center";
-         colDiv.setAttribute("style", "height: 10vh");
+         colDiv.className = "col-3 border text-center p-0";
+         colDiv.setAttribute("id", count);
+         colDiv.setAttribute("style", "max-height: 70px; overflow:hidden;");
          colDiv.addEventListener('click', tileClick);
-         colDiv.id = count;
          rowDiv.appendChild(colDiv);
          count++;
       }
