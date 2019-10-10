@@ -21,6 +21,8 @@ class Tile {
 
          let imgDiv = document.createElement('img');
          imgDiv.setAttribute("src", img);
+         imgDiv.setAttribute('width', '300px');
+         imgDiv.setAttribute('height', '300px');
          imgDiv.setAttribute("id", this.startEndPos);
 
          if (this.currentPos == 0) {
